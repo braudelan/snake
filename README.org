@@ -1,0 +1,64 @@
+#+title: Snake game
+#+options: num:nil toc:nil author:nil date:nil
+#+latex_header: \usepackage{geometry}
+#+latex_header: \geometry{left=1cm,right=1cm,marginparwidth=6.8cm, marginparsep=1.2cm,top=0.8cm,bottom=0.5cm}
+
+* Description
+  -----
+  + A screen with boundaries (walls).
+  + A segmented snake.
+  + The snake moves constantly across the screen.
+  + Fruit appear and disappear randomly on the screen.
+  + When the snake eats a fruit it is elongated by 1 segment.
+  + If the snake hits a wall or itself the game (or round) ends.
+
+* Guidlines
+  -----
+  + Full separation between logic and graphic aspects.
+  + The logic consists of an event loop where every second or so the program asks for input and then renders the graphic according to the input.
+    
+* Components
+  -----
+** Screen
+   A representation of the screen. An indexed matrix of X rows and X columns.
+** Snake
+   Represented by a location and orientation of the head of the snake (~head_location~ and ~head_direction~, respectively) and a length (~n_segments~). The head location and orientation are denoted as the ~position~ of the head.
+      + *Location*: Index in the 2d matrix, where /i/ represents the row and /j/ the column.
+      + *Orientation*: Direction to which the head is facing. Represented by one of /e/, /w/, /n/ or /s/, which stands for the four wind directions. 
+      + *Movement*: The current snake position and the user input (~input~) and changes the position accordingly.
+      + *Elongation*: If snake ~head_loc~ coincide with a fruit, increment ~n_segments~.
+
+** Fruit
+    A fruit is represented as a location on the screen. At any given event, the program holds a number of fruit locations on the screen. Fruit locations, and the number of fruit at given time are chosen randomly (within certain restrictions) and these change every (random?fixed?) number of events?
+    
+** State
+   The state of the game is defined by the position of the snake and locations of the fruit.
+
+** Event
+   + Defined by the current state of the game, the user input, and the random changes (if any) occurring during the event.
+   + The frequency of events is constant (e.g. every second).
+
+** Event sequence
+   1. Get user input.
+   2. Record fruit location changes (if any).
+   3. Change snake position according to ~input~.
+   4. Elongate snake if needed.
+   5. render new state.
+
+* COMMENT Implementation
+  
+** Move snake
+
+*** Pseudo code
+    Arguments:
+            + input :: either RIGHT or LEFT
+            + location :: a tuple LOCATION, with LOCATION[0] -> row, and LOCATION[1] -> column.
+            + direction :: a string. One of ['e', 'w', 'n', 's'] (wind directions).
+    Output: new LOCATION and DIRECTION.
+    
+    #+begin_src emacs-lisp :exports both :lexical yes
+      (defun snk/move (position input)
+        "Change POSITION according to user INPUT"
+        (interactive "k"))
+    #+end_src
+
