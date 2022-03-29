@@ -1,12 +1,8 @@
-import numpy as np
 from collections import namedtuple
+import numpy as np
+import pygame
 
-
-# numbers representing snake and fruit on the screen matrix
-# SNAKE = 1
-FRUIT = -1
-
-# possible directions for the snake
+# possible directions for the snake and their respective integer representation 
 DIRECTIONS = {
     'W': 0,
     'N': 1,
@@ -24,7 +20,6 @@ MOVEMENTS = {
     'S': (1, 0)
 }
 
-
 def get_fruit(screen_size=20, fruit=1) -> list:
     """
     return a list of random fruit locations
@@ -41,19 +36,6 @@ def get_fruit(screen_size=20, fruit=1) -> list:
     ]
     return fruit_locations
 
-
-# def get_initial_state(screen_size, snake_length):
-#     '''get the initial state of the screen, snake and fruit'''
-
-#     snake = get_initial_snake()
-#     fruit = get_fruit_locations()  # default number of fruit is 1
-
-#     InitialState = namedtuple(
-#         'State', 
-#         ['snake', 'fruit']
-#     )
-#     return InitialState(snake=snake, fruit=fruit)
-
 def get_initial_snake(screen_size):
     '''get the initial locations of snake and direction of the head'''
     head = (screen_size // 2, screen_size-2)
@@ -68,6 +50,11 @@ def get_initial_snake(screen_size):
     )
     return InitialSnake(locations, direction)
 
+def initialize(screen_size, n_fruit):
+    return (
+        get_initial_snake(screen_size),
+        get_fruit(screen_size, n_fruit)
+    )
 
 def get_next_direction(current_direction,
                        direction_from_input) -> str:
@@ -83,7 +70,6 @@ def get_next_direction(current_direction,
     else:
         next_direction = current_direction
     return next_direction
-
 
 def get_next_snake(current_snake,
                    direction_from_input) -> namedtuple:
@@ -108,4 +94,19 @@ def get_next_snake(current_snake,
         direction=next_direction
     )
 
+def main_loop(screen_size=500):
+    pygame.init()
+    pygame.display.set_caption("Snakelan")
 
+    screen = pygame.display.set_mode((screen_size, screen_size))
+    clock = Clock()
+    running = 1
+    snake, fruit = intialize(screen_size, n_fruit)
+    game_on = True
+    while game_on:
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = 0
+        user_input = # get input from pygame
+        next_snake = get_next_snake(snake, user_input)
+        fruit =
