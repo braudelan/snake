@@ -3,7 +3,7 @@
 #+latex_header: \usepackage{geometry}
 #+latex_header: \geometry{left=1cm,right=1cm,marginparwidth=6.8cm, marginparsep=1.2cm,top=0.8cm,bottom=0.5cm}
 #+startup: indent:1
-Hit 'q' to exit the game.
+Move the snake with the arrows, hit 'q' to exit the game, and be carfull not hit the walls or yourself! 
 
 ** Implementation
 *** Components
