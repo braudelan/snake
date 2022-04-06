@@ -1,9 +1,9 @@
-#+title: Snake game
+#+title: Simple Snake game in Python
 #+options: num:nil toc:nil author:nil date:nil
 #+latex_header: \usepackage{geometry}
 #+latex_header: \geometry{left=1cm,right=1cm,marginparwidth=6.8cm, marginparsep=1.2cm,top=0.8cm,bottom=0.5cm}
 
-* A simple snake game.
+
 * Implementation
 ** Components
   -----
