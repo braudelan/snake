@@ -2,26 +2,24 @@
 #+options: num:nil toc:nil author:nil date:nil
 #+latex_header: \usepackage{geometry}
 #+latex_header: \geometry{left=1cm,right=1cm,marginparwidth=6.8cm, marginparsep=1.2cm,top=0.8cm,bottom=0.5cm}
+#+startup: indent:1
 
-
-* Implementation
-** Components
+** Implementation
+*** Components
   -----
-*** Screen
-   A representation of the screen. A 2D matrix where X represents columns and Y rows.
-*** Snake
-   Represented by an array of location-orientation elements. Location is designated as x, y coordinates, and orientation is either 0 or 1, for horizontal and vertical respectively.
-   
-      + *Location*: Index in the 2d matrix, where /i/ represents column and /j/ row.
-      + *Orientation*: Direction to which the head is facing. Represented by one of /E/, /W/, /N/ or /S/, which stands for the four wind directions.
-   
-*** Fruit
-   A list of fruit locations.
+**** Screen
+   A 2D matrix where X represents columns and Y rows.
+**** Snake
+Has two components:
++ Array of positions for each segment. The first element of the array is the snake tail and the last one is the head. Each array element contains x,y coordinates representing the top left corner of the segment and a boolean value representing the orientation of the segment (horizontal or vertical).
++ The direction of the snake head. One of E, W, S or N (wind directions). 
+**** Fruit
+   A list of fruit locations as x,y coordinates.
 
-** Loop
+*** Loop
    1. Get user input.
    2. Record fruit location changes (if any).
-   3. Change snake position according to ~input~.
+   3. Change snake position according to user input.
    4. Elongate snake if needed.
    5. render new state.
       
