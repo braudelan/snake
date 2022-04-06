@@ -1,15 +1,15 @@
+import random
 from collections import namedtuple
 import numpy
 import numpy.random
 from numpy import array
 from numpy.random import choice
 import pygame
-# import sys
+
 
 # Logic Constants
 # -----------------------------------------------------------------------------
-
-# possible directions for the snake and their respective integer representation 
+# possible directions for the snake and their integer representation 
 DIRECTIONS = {
       'W': 0,
       'N': 1,
@@ -35,11 +35,13 @@ Snake = namedtuple(
 
 # Display constants
 # -------------------------------------------------------------------------------
-
+NAME_OF_GAME = "EGSAsnake"
+SCREEN_DIMENSIONS = (640, 480)
 BG_COLOR = ("#696969")
 SNAKE_COLOR = ("#00bfff")
 FRAMES_PER_SECOND = 16
 SECONDS_PER_FRAME = 60 / FRAMES_PER_SECOND
+N_FRUIT = 4
 
 # Logic functions
 # -------------------------------------------------------------------------------
@@ -47,11 +49,13 @@ SECONDS_PER_FRAME = 60 / FRAMES_PER_SECOND
 
 def get_fruit_dimensions(screen_dimensions,
                          scale=SCREEN_TO_OBJECT_SCALE):
+    """Dimensions of single fruit."""
     fruit_side = screen_dimensions[0] * scale
     return (fruit_side, fruit_side)
 
 
 def get_segment_dimensions(screen_dimensions):
+    """Dimensions of single snake unit"""
     ratio = 1
     width = screen_dimensions[0] * SCREEN_TO_OBJECT_SCALE
     length = width * ratio
@@ -82,23 +86,23 @@ def get_initial_snake(screen_dimensions):
     Coordinates origin is in top left corner of the screen.
     Segment position is given by the top left corner
     of the rectangle defining the segment,
-    and it's horizontal and vertical dimensions.
+    and it's orientation (0=horizontal, 1=vertical).
 
     :param screen_dimensions: tuple
     x and y dimensions of screen.
-    :returns: namedtuple (Snake)
-    locations of snake segments and direction of snake head.
+    :returns: Snake
+    State of snake (locations, orientations and direction of snake head).
     """
 
     # get segment dimensions (horizontal, vertical)
-    segment_dimensions = segment_width, segment_length= (
+    segment_width, segment_length = (
         get_segment_dimensions(screen_dimensions)
     )
     # head location top left corner (x, y, orientation)
     head = (
         screen_dimensions[0] - 2 * segment_width,
         screen_dimensions[1] // 2,
-        0
+        0  # orientation
     )
 
     head_x = head[0]
@@ -116,18 +120,28 @@ def get_initial_snake(screen_dimensions):
     return Snake(locations, direction)
 
 
-def initialize(screen_dimensions, n_fruit):
+def init_snake_fruit(screen_dimensions, n_fruit):
     return (
         get_initial_snake(screen_dimensions),
         get_fruit(screen_dimensions, n_fruit)
     )
 
 
-def get_next_direction(current_direction,
-                       direction_from_input) -> str:
-    # if current direction is opposite to input direction
-    #  or no input stay with current direction
-    # otherwise return input direction
+def get_next_direction(current_direction: str,
+                       direction_from_input: str) -> str:
+    """
+    Get the next head direction based on user input.
+
+    if current direction is opposite to input direction
+    or no input, stay with current direction
+    otherwise return input direction.
+
+    :param current_direction: str
+    :param direction_from_input: str
+    :returns: str
+    next direction.
+    """
+
     next_direction = current_direction
     if direction_from_input:
         sum_directions = (
@@ -144,14 +158,11 @@ def get_next_snake(screen_dimensions: tuple, current_snake: Snake,
                    direction_from_input: str) -> Snake:
     segment_width, segment_length = get_segment_dimensions(screen_dimensions)
     current_locations = current_snake.locations
-    # current_direction = current_snake.direction
     current_head_location = current_locations[-1][:2]
-    # current_head_orientation = current_locations[-1][2]
-    user_input = direction_from_input
 
     next_direction = get_next_direction(
         current_snake.direction,
-        user_input
+        direction_from_input
     )
     next_head_top_left = (
         current_head_location
@@ -173,10 +184,11 @@ def get_next_snake(screen_dimensions: tuple, current_snake: Snake,
 
 
 def elongate(screen_dimensions, snake, fruit):
-    """check if snake hit a fruit, elongate snake and remove fruit.
+    """
+    check if snake hit a fruit, elongate snake and remove fruit.
 
     :param snake: Snake
-    the current snake (locations and direction)
+    the current snake
     :param fruit: list
     a list of fruit locations
     :returns: Snake
@@ -188,6 +200,8 @@ def elongate(screen_dimensions, snake, fruit):
 
     def is_head_fruit_overlap(head,
                               fruit_location):
+        """Check if snake head location overlaps a fruit location."""
+        # find the middle of the front of snake head
         orientation = head[2]
         if orientation == 0:
             head_middle = (
@@ -200,31 +214,38 @@ def elongate(screen_dimensions, snake, fruit):
                 + segment_width / 2, head[1]
             )
 
+        # check if middle of head is within the rectangle defining the fruit
         is_middle_in_fruit_x = (
             fruit_location[0] < head_middle[0] < fruit_location[0] + fruit_side
         )
         is_middle_in_fruit_y = (
             fruit_location[1] < head_middle[1] < fruit_location[1] + fruit_side
         )
+
+        # return True if head overlaps fruit otherwise False
         if is_middle_in_fruit_x and is_middle_in_fruit_y:
             return True
         return False
 
+    # get the head and tail segments
     locations = snake.locations
     head = locations[-1]
     tail = locations[0]
 
+    # for each fruit check if head overlaps, if so push the new tail and remove fruit
     for i, fruit_location in enumerate(fruit):
         if is_head_fruit_overlap(head, fruit_location):
             new_tail = tail
             locations = [new_tail] + locations
             fruit.pop(i)
 
-    return Snake(locations, snake.direction), fruit
+    return (
+        Snake(locations, snake.direction),
+        fruit
+    )
 
 
-def get_next_state(screen_dimensions, ):
-
+def get_next_state(screen_dimensions, ):  # TODO 
     """
     Get next snake and fruit positions.
 
@@ -251,18 +272,24 @@ def game_over(screen_dimensions: tuple, snake: Snake) -> bool:
     :returns: bool
     True if the game is over else False
     """
+
+    # get segments of body and head segments
     body = snake.locations[:-1]
     head = snake.locations[-1]
+
     # check if head location overlaps any of the segments positions 
     for segment in body:
         if (array(head[:2]) == array(segment[:2])).all(): 
             return True
+
     # check if head x or y are larger than screen dimensions
     if head[0] > screen_dimensions[0] or head[1] > screen_dimensions[1]:
         return True
+
     # check if head x or y are smaller than zero
     if head[0] < 0 or head[1] < 0:
         return True
+
     return False
 
 
@@ -288,25 +315,26 @@ def get_fruit_image(screen_dimensions,
     return image
 
 
-def main_loop(screen_dimensions=(640, 480), n_fruit=2):
+def main_loop(screen_dimensions=SCREEN_DIMENSIONS,
+              n_fruit=N_FRUIT):
     # initialize clock
     clock = pygame.time.Clock()
 
     # display setup
-    pygame.display.set_caption("EGSAsnake")
+    pygame.display.set_caption(NAME_OF_GAME)
     screen = pygame.display.set_mode(screen_dimensions)
     screen.fill(BG_COLOR)
 
     # get images for snake segment and fruit
-    SEGMENT_IMAGE = get_segment_image(screen_dimensions)
-    FRUIT_IMAGE = get_fruit_image(screen_dimensions)
+    segment_image = get_segment_image(screen_dimensions)
+    fruit_image = get_fruit_image(screen_dimensions)
 
-    # initialize snake and fruit 
-    snake, fruit = initialize(screen_dimensions, n_fruit)
+    # initialize snake and fruit and blit on screen
+    snake, fruit = init_snake_fruit(screen_dimensions, n_fruit)
     for location in snake.locations:
-        screen.blit(SEGMENT_IMAGE, location[:2])
+        screen.blit(segment_image, location[:2])
     for fruit_location in fruit:
-        screen.blit(FRUIT_IMAGE, fruit_location)
+        screen.blit(fruit_image, fruit_location)
 
     # setup for changing fruit locations on fixed time intervals
     frames_per_interval = 8
@@ -316,8 +344,10 @@ def main_loop(screen_dimensions=(640, 480), n_fruit=2):
         * 100
     )
     fruit_timer_event = pygame.USEREVENT + 1
-    pygame.time.set_timer(fruit_timer_event, timer_interval)
-    new_fruit = False
+
+    # Start the fruit timer and initialize switch to 'off'
+    pygame.time.set_timer(fruit_timer_event, timer_interval)  
+    is_new_fruit = False
 
     # infinite loop
     game_on = True
@@ -340,7 +370,7 @@ def main_loop(screen_dimensions=(640, 480), n_fruit=2):
                                  None)
             # check fruit timer and set to True if timer elapsed
             if event.type == fruit_timer_event:
-                new_fruit = True
+                is_new_fruit = True
 
         # get the next snake
         snake = get_next_snake(
@@ -350,8 +380,8 @@ def main_loop(screen_dimensions=(640, 480), n_fruit=2):
         )
 
         # get a new set of fruit if timer has elapsed
-        fruit = get_fruit(screen_dimensions, n_fruit) if new_fruit else fruit
-        new_fruit = False   # reset the new_fruit switch
+        fruit = get_fruit(screen_dimensions, n_fruit) if is_new_fruit else fruit
+        is_new_fruit = False   # reset the new_fruit switch
 
         # elongate snake if any fruit has been eaten
         snake, fruit = elongate(screen_dimensions, snake, fruit)
@@ -361,13 +391,13 @@ def main_loop(screen_dimensions=(640, 480), n_fruit=2):
 
         # check for game over
         if game_over(screen_dimensions, snake):
-            snake, fruit = initialize(screen_dimensions, n_fruit)
+            snake, fruit = init_snake_fruit(screen_dimensions, n_fruit)
 
         # blit new snake and fruit onto screen
         for location in snake.locations:
-            screen.blit(SEGMENT_IMAGE, location[:2])
+            screen.blit(segment_image, location[:2])
         for fruit_location in fruit:
-            screen.blit(FRUIT_IMAGE, fruit_location)
+            screen.blit(fruit_image, fruit_location)
 
         # redisplay the updated screen
         pygame.display.flip()
@@ -375,9 +405,8 @@ def main_loop(screen_dimensions=(640, 480), n_fruit=2):
         # set the frames-per-second rate
         clock.tick(FRAMES_PER_SECOND)
 
-
 if __name__ == "__main__":
     pygame.init()
-    main_loop((640, 480), 3)
+    main_loop()
     pygame.quit()
-    # sys.exit()
+
