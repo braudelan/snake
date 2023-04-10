@@ -5,35 +5,7 @@
 #+startup: indent:1
 Move the snake with the arrows, hit 'q' to exit the game, and be carfull not hit the walls or yourself! 
 
-** Implementation
-*** Components
-**** Screen
-   A 2D matrix where X represents columns and Y rows.
-**** Snake
-Has two components:
-+ Array of positions for each segment. The first element of the array is the snake tail and the last one is the head. Each array element contains x,y coordinates representing the top left corner of the segment and a boolean value representing the orientation of the segment (horizontal or vertical).
-+ The direction of the snake head. One of E, W, S or N (wind directions). 
-**** Fruit
-   A list of fruit locations as x,y coordinates.
 
-*** Loop
-   1. Get user input.
-   2. Record fruit location changes (if any).
-   3. Change snake position according to user input.
-   4. Elongate snake if needed.
-   5. render new state.
-      
-* COMMENT Implementation
-  
-** Move snake
-
-*** Pseudo code
-    Arguments:
-            + input :: either RIGHT or LEFT
-            + location :: a tuple LOCATION, with LOCATION[0] -> row, and LOCATION[1] -> column.
-            + direction :: a string. One of ['e', 'w', 'n', 's'] (wind directions).
-    Output: new LOCATION and DIRECTION.
-    
     #+begin_src emacs-lisp :exports both :lexical yes
       (defun snk/move (position input)
         "Change POSITION according to user INPUT"
